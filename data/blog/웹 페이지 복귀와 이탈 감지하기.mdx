@@ -1,0 +1,63 @@
+---
+title: '웹 페이지 복귀와 이탈 감지하기'
+date: '2023-09-16'
+lastmod: '2023-09-16'
+tags: ['visibilityState', 'react', '페이지 복귀', '페이지 이탈']
+draft: false
+summary: 'visibilityState를 이용하여 웹 페이지 복귀, 이탈 이벤트를 다뤄보자.'
+layout: PostSimple
+bibliography: references-data.bib
+---
+
+## Overview
+
+<TOCInline toc={props.toc} exclude="Overview" toHeading={2} />
+
+window 객체에 내장된 visibilityState를 이용하면 웹 페이지 복귀, 이탈 이벤트를 다룰 수 있다.
+
+## Document.visibilityState
+
+`Document.visibilityState`는 document의 가시성 [^1]을 반환하며 다음과 같은 값을 가진다.
+
+[^1]: 눈에 띄는 정도
+
+- `visible`: 페이지가 최소화 되지 않은 창(브라우저)에서의 선택된 탭.
+- `hidden`: document가 background-tap(다른 탭)이거나, 최소화 된 창의 일부이거나, OS 화면 잠금이 활성 상태임을 의미.
+
+## 페이지 복귀와 이탈 감지하기
+
+`Document.visibilityState`의 값이 변경되면 `visibilitychange` 이벤트가 발생하여 웹 페이지 가시성에 따른 동작을 처리할 수 있다.
+
+```js:exapmle
+document.addEventListener("visibilitychange", () => {
+  console.log(document.visibilityState);
+  // 기타 동작...
+});
+```
+
+## React에서의 visibilityState 사용
+
+React에서는 커스텀 훅으로 사용할 수 있다. `useEffect`로 컴포넌트 생명주기를 고려하여 구현하는 방법은 다음과 같다.
+
+```ts:example
+useEffect(() => {
+    function handleVisibilityChange() {
+      // 페이지 복귀
+      if (document.visibilityState === 'visible') {
+        console.log('복귀');
+      }
+
+      // 페이지 이탈
+      if (document.visibilityState === 'hidden') {
+        console.log('이탈');
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      // 메모리 누수 방지
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+```
